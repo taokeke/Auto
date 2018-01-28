@@ -5,7 +5,7 @@ from H3CSwitchError import *
 
 
 class H3CSwitch(object):
-        def __int__(self, host=None, password=None, username=None, super_password=None, port_lists=None):
+    def __int__(self, host=None, password=None, username=None, super_password=None, port_lists=None):
             self.host = host
             self.username = username
             self.password = password
@@ -15,24 +15,24 @@ class H3CSwitch(object):
             self._connection = None
             self.hostname = None
 
-            if self.username == '' :
+            if self.username == '':
                 self.username = None
 
-        def connect(self, host=None, port=23, timeout=2):
+    def connect(self, host=None, port=23, timeout=2):
             # 建立交换机连接
             if host is None:
                 host = self.host
-            # 调用私有函数
+            # 调用私有方法
             self._connection = telnetlib.Telnet(host, port, timeout)
             self._authenticate()
             self._get_hostname()
             self._super()
-            # 关闭分屏功能
+            # 关闭交换机分屏显示功能
             self.cmd("screen-length 0 temporary")
 
             self.connected = True
 
-        def disconnect(self):
+    def disconnect(self):
             if self._connection is not None:
                 self._connection.write('quit' + '\n')
                 self._connection.close()
@@ -40,7 +40,7 @@ class H3CSwitch(object):
             self._connection = None
             self.connected = False
 
-        def _authenticate(self):
+    def _authenticate(self):
             # 忽略U和P大小写情况
             idx, match, text = self.expect(['sername:', 'assword:'], 5)
 
@@ -69,8 +69,115 @@ class H3CSwitch(object):
                     # Check for an valid login
                     idx, match, text = self.expect(['#', '>', "invalid", "failed"], 2)
                     if match is None:
-                        raise AuthenticationError("Unexpected text post-login", text)
+                        raise AuthenticationError("未能得到反馈", text)
                     elif b"invalid" in match.group() or b"failed" in match.group():
-                        raise AuthenticationError("Unable to login. Your username or password are incorrect.")
+                        raise AuthenticationError("无法登陆，username或password错误")
             else:
-                raise AuthenticationError("Unable to get a login prompt")
+                raise AuthenticationError("无法获得登陆提示")
+
+    def _get_hostname(self):
+        self.write("\n")
+
+        idx, match, text = self.expect(['>'], 2)
+        # 获取<设备名称>，并将"<"及">"替换为空格
+        if match is not None:
+            tmp = text.replace('<','').strip()
+            # strip（）方法用于移除空格
+            self.hostname = tmp.replace('>', '').strip()
+        else:
+            raise H3CSwitchError("无法获取设备名")
+
+    def _super(self, password=None):
+        if password is not None:
+            self.super_password = password
+        self.write('\n')
+        self.read_until_prompt()
+
+        self.write("super"+'\n')
+
+        idx, match, text = self.expect(['>', 'assword:'], 1)
+
+        if match is None:
+            raise H3CSwitchError("无法进入特权模式")
+        else:
+            # 无super密码情况
+            if 'privilege is 3' in text:
+                return
+            # 需要super密码，输入密码
+            elif 'assword' in text:
+                self.write(self.super_password + "\n")
+
+        idx, match, text = self.expect([">", 'assword:'], 1)
+        # 打印所有匹配到的对象
+        print match.group()
+        if match is None:
+            raise H3CSwitchError("尝试super模式时，无法获得反馈", text=None)
+        elif match.group().count(b'assword') > 0:
+            self.write("\n\n\n")
+            raise H3CSwitchError("password错误")
+        elif 'privilege is 3' in text:
+            return
+
+    def expect(self, asearch, timeout=2):
+        # 对需要进行read until 操作的字符进行ascii格式转换
+        idx, match, result = self._connection.expect([needle.encode('ascii') for needle in asearch], timeout)
+        return idx, match, result
+
+    def write(self, text):
+        """ 将输入指令转换成设备可读的ascii格式 """
+
+        if self._connection is None:
+            self.connect()
+            raise H3CSwitchError("未连接设备")
+
+        self._connection.write(text.encode('ascii'))
+
+    def read_until_prompt(self, prompt=None, timeout=5):
+        thost = self.hostname
+
+        if thost is None:
+            raise H3CSwitchError("设备未命名", text=None)
+
+        if prompt is None:
+            expect = [thost + ">"]
+        else:
+            expect = [thost + prompt]
+
+        idx, match, ret_text = self.expect(expect, timeout)
+
+        return ret_text
+
+    def cmd(self, cmd_text):
+        """ 向设备输入命令并取得反馈结果"""
+
+        self.write(cmd_text + "\n")
+        text = self.read_until_prompt()
+
+        # 以换行分割获取到的字符串，从后往前依次添加\n并拼接成单元素字符串
+        ret_text = ""
+        for a in text.split('\n')[:-1]:
+            ret_text += a + "\n"
+
+        # 获取当前设备名称
+        if 'hostname' in cmd_text:
+            self._get_hostname()
+
+        if "Error" in ret_text:
+            raise InvalidCommand(cmd_text)
+
+        return ret_text
+
+    def get_portlists(self):
+        portlists = None
+
+        return portlists
+
+    def get_port_info(self, port_list):
+        port_info = None
+
+        return port_info
+
+    def get_port_status(self, port_list, port_info):
+        port_status = None
+
+        return  port_status

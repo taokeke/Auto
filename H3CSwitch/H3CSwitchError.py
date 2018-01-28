@@ -14,3 +14,12 @@ class H3CSwitchError(Exception):
 
 class AuthenticationError(H3CSwitchError):
     pass
+
+
+class InvalidCommand(H3CSwitchError):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def __str__(self):
+        ret = "错误命令 " + str(self.cmd)
+        return ret
