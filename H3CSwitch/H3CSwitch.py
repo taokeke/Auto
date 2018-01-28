@@ -3,6 +3,7 @@ import telnetlib
 import re
 from H3CSwitchError import *
 
+# 恍恍惚惚好
 
 class H3CSwitch(object):
         def __int__(self, host=None, password=None, username=None, super_password=None, port_lists=None):
