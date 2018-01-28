@@ -11,7 +11,6 @@ class H3CSwitch(object):
             self.password = password
             self.super_password = super_password
             self.port_lists = port_lists
-            self.port_lists = port_lists
             self.connected = False
             self._connection = None
             self.hostname = None
