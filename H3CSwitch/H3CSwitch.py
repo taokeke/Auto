@@ -148,7 +148,7 @@ class H3CSwitch(object):
         return ret_text
 
     def cmd(self, cmd_text):
-        """ 向设备输入命令并取得反馈结果"""
+        """ 向设备输入命令并得到反馈结果"""
 
         self.write(cmd_text + "\n")
         text = self.read_until_prompt()
