@@ -28,7 +28,7 @@ class H3CSwitch(object):
             self._get_hostname()
             self._super()
             # 关闭交换机分屏显示功能
-            self.cmd("screen-length 0 temporary")
+            self.cmd("screen-length disable")
 
             self.connected = True
 
@@ -168,16 +168,26 @@ class H3CSwitch(object):
         return ret_text
 
     def get_portlists(self):
-        portlists = None
-
+        portlists = []
+        re_text = ''
+        result = self.cmd("display current-configuration | include ^interface")
+        items = re.findall(re_text, result)
+        for item in items:
+            portlists.append({
+                "hostname": self.hostname,
+                "mac": item[0],
+                "vlan": item[1],
+                "interface": Function.function.change_int_name(item[2]),
+                "type": item[3],
+            })
         return portlists
 
     def get_port_info(self, port_list):
-        port_info = None
+        port_info = []
 
         return port_info
 
     def get_port_status(self, port_list, port_info):
-        port_status = None
+        port_status = []
 
         return  port_status
