@@ -170,14 +170,29 @@ class H3CSwitch(object):
     def get_portlists(self):
         portlists = []
 
-        result = self.cmd("display current-configuration | include ^interface.+Ethernet")
+        result = self.cmd('display current-configuration | include ^interface.+Ethernet')
         print result
         for a in result.split('\n')[1:-1]:
-            portlists.append(a.strip('\r'))
+            b = a.strip('interface ')
+            c = b.strip('\r')
+            portlists.append(c)
         return portlists
 
     def get_port_info(self, port_lists):
         port_info = []
+        num = len(port_lists)
+
+        for b in port_lists:
+            info = self.cmd('display current-configuration interface ' + b + ' | exclude ' + b)
+            infe = info.replace('\n', '')
+            print infe
+            re_text = '#.*#'
+            result = re.findall(re_text, infe)
+            print(result)
+            port_info.append({
+                "portlist": b,
+                "info": result
+            })
 
         return port_info
 
