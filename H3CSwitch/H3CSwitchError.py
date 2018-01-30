@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class H3CSwitchError(Exception):
     def __init__(self, value, text=''):
         self.value = value
@@ -7,7 +8,7 @@ class H3CSwitchError(Exception):
         ret = self.value
 
         if self.text is not None and self.text != '':
-            ret += "\n从交换机中得到反馈： " + str(self.text)
+            ret += "\n from ： " + str(self.text)
 
         return ret
 

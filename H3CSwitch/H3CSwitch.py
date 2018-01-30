@@ -31,7 +31,7 @@ class H3CSwitch(object):
             self.cmd("screen-length disable")
 
             self.connected = True
-
+            print 'success'
     def disconnect(self):
             if self._connection is not None:
                 self._connection.write('quit' + '\n')
@@ -153,7 +153,7 @@ class H3CSwitch(object):
         self.write(cmd_text + "\n")
         text = self.read_until_prompt()
 
-        # 以换行分割获取到的字符串，从后往前依次添加\n并拼接成单元素字符串
+        # 去除设备名称字符后的无关信息
         ret_text = ""
         for a in text.split('\n')[:-1]:
             ret_text += a + "\n"
@@ -169,20 +169,14 @@ class H3CSwitch(object):
 
     def get_portlists(self):
         portlists = []
-        re_text = ''
-        result = self.cmd("display current-configuration | include ^interface")
-        items = re.findall(re_text, result)
-        for item in items:
-            portlists.append({
-                "hostname": self.hostname,
-                "mac": item[0],
-                "vlan": item[1],
-                "interface": Function.function.change_int_name(item[2]),
-                "type": item[3],
-            })
+
+        result = self.cmd("display current-configuration | include ^interface.+Ethernet")
+        print result
+        for a in result.split('\n')[1:-1]:
+            portlists.append(a.strip('\r'))
         return portlists
 
-    def get_port_info(self, port_list):
+    def get_port_info(self, port_lists):
         port_info = []
 
         return port_info
