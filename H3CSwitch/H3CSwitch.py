@@ -32,6 +32,18 @@ class H3CSwitch(object):
             self.cmd("screen-length 0 temporary")
             self.connected = True
             print 'success'
+
+    def connectx(self):
+        self.cmd('telnet 198.21.220.251')
+        self._authenticate()
+        self._get_hostname()
+        self._super()
+        # 关闭交换机分屏显示功能
+        # self.cmd("screen-length disable")
+        self.cmd("screen-length 0 temporary")
+        self.connected = True
+        print 'success'
+
     def disconnect(self):
             if self._connection is not None:
                 self._connection.write('quit' + '\n')
