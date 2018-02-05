@@ -1,5 +1,6 @@
 from H3CSwitch.H3CSwitch import *
 
+
 host = "11.1.7.240"
 username = "bosbranch"
 password = "branchlyq2014"
@@ -10,7 +11,7 @@ tn.write(username.encode('ascii')+"\n")
 tn.read_until("word:", 5)
 tn.write(password.encode('ascii')+"\n")
 tn.read_until(">", 5)
-print 'success'
+print 'success '
 test = H3CSwitch()
 test.host = '198.21.220.251'
 test.password = 'bosbranch'
