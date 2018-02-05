@@ -5,7 +5,7 @@ from H3CSwitchError import *
 
 
 class H3CSwitch(object):
-    def __int__(self, host=None, password=None, username=None, super_password=None, port_lists=None):
+    def __init__(self, host=None, password=None, username=None, super_password=None, port_lists=None):
             self.host = host
             self.username = username
             self.password = password
@@ -28,8 +28,8 @@ class H3CSwitch(object):
             self._get_hostname()
             self._super()
             # 关闭交换机分屏显示功能
-            self.cmd("screen-length disable")
-
+            # self.cmd("screen-length disable")
+            self.cmd("screen-length 0 temporary")
             self.connected = True
             print 'success'
     def disconnect(self):
@@ -39,7 +39,7 @@ class H3CSwitch(object):
 
             self._connection = None
             self.connected = False
-
+            print("success")
     def _authenticate(self):
             # 忽略U和P大小写情况
             idx, match, text = self.expect(['sername:', 'assword:'], 5)
