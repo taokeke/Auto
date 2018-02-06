@@ -28,8 +28,8 @@ class H3CSwitch(object):
             self._get_hostname()
             self._super()
             # 关闭交换机分屏显示功能
-            # self.cmd("screen-length disable")
-            self.cmd("screen-length 0 temporary")
+            self.cmd("screen-length disable")
+            # self.cmd("screen-length 0 temporary")
             self.connected = True
             print 'success'
 
@@ -52,6 +52,7 @@ class H3CSwitch(object):
             self._connection = None
             self.connected = False
             print("success")
+
     def _authenticate(self):
             # 忽略U和P大小写情况
             idx, match, text = self.expect(['sername:', 'assword:'], 5)
@@ -60,13 +61,13 @@ class H3CSwitch(object):
                 raise AuthenticationError("无法获取到username或password输入提示",
                                           text)
             # 情况1：无username
-            elif match.group().count(b'assword:'):
+            elif match.group().count('assword:'):
                 self.write(self.password + "\n")
                 # 再次出现password说明密码错误
                 idx, match, text = self.expect(['assword', '>', '#'], 5)
-                if match.group() is not None and match.group().count(b'assword'):
+                if match.group() is not None and match.group().count('assword'):
                     raise AuthenticationError("password错误")
-            elif match.group().count(b'sername') > 0:
+            elif match.group().count('sername') > 0:
                 if self.username is None:
                     raise AuthenticationError("要求输入username，但username为空字段")
                 else:
@@ -75,14 +76,13 @@ class H3CSwitch(object):
 
                     if match is None:
                         raise AuthenticationError("未能输入password", text)
-                    elif match.group().count(b'assword'):
+                    elif match.group().count('assword'):
                         self.write(self.password + "\n")
-
                     # Check for an valid login
                     idx, match, text = self.expect(['#', '>', "invalid", "failed"], 2)
                     if match is None:
                         raise AuthenticationError("未能得到反馈", text)
-                    elif b"invalid" in match.group() or b"failed" in match.group():
+                    elif "invalid" in match.group() or "failed" in match.group():
                         raise AuthenticationError("无法登陆，username或password错误")
             else:
                 raise AuthenticationError("无法获得登陆提示")
@@ -124,7 +124,7 @@ class H3CSwitch(object):
         print match.group()
         if match is None:
             raise H3CSwitchError("尝试super模式时，无法获得反馈", text=None)
-        elif match.group().count(b'assword') > 0:
+        elif match.group().count('assword') > 0:
             self.write("\n\n\n")
             raise H3CSwitchError("password错误")
         elif 'privilege is 3' in text:
