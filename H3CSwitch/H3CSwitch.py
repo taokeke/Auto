@@ -191,7 +191,7 @@ class H3CSwitch(object):
         return portlists
 
     def get_port_info(self, port_lists):
-        port_info = []
+        port_info_lists = []
         num = len(port_lists)
 
         for b in port_lists:
@@ -201,14 +201,48 @@ class H3CSwitch(object):
             re_text = '#.*#'
             result = re.findall(re_text, infe)
             print(result)
-            port_info.append({
+            port_info_lists.append({
                 "portlist": b,
                 "info": result
             })
 
-        return port_info
+        return port_info_lists
 
-    def get_port_status(self, port_list, port_info):
-        port_status = []
+    def get_port_status(self, port_info_lists):
+        port_status_lists = []
 
-        return  port_status
+        for a in port_info_lists:
+            info = str(a.get('info'))
+            portlist = a.get('portlist')
+            # 关闭
+            if info.count('shutdown') > 0:
+                port_status_lists.append({
+                    "portlist": portlist,
+                    "status": 0
+                })
+            # trunk口
+            elif info.count('trunk') > 0:
+                port_status_lists.append({
+                    "portlist": portlist,
+                    "status": 1
+                })
+            # 准入口
+            elif info.count('dot1x') > 6:
+                port_status_lists.append({
+                    "portlist": portlist,
+                    "status": 2
+                })
+            # 例外口
+            elif info.count('mac-address') > 0:
+                port_status_lists.append({
+                    "portlist": portlist,
+                    "status": 3
+                })
+            # 问题口
+            else:
+                port_status_lists.append({
+                    "portlist": portlist,
+                    "status": 4
+                })
+
+        return port_status_lists
