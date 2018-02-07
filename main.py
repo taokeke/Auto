@@ -14,4 +14,9 @@ print 'port_info = '
 print port_info
 port_status_lists = test.get_port_status(port_info)
 print port_status_lists
+info = test.cmd('display mac-address interface Ethernet1/0/1')
+print info
+
+result = test.get_port_mac(port_status_lists)
+print result
 test.disconnect()

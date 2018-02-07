@@ -246,3 +246,25 @@ class H3CSwitch(object):
                 })
 
         return port_status_lists
+
+    def get_port_mac(self, port_status_lists):
+        port_mac_lists = []
+
+        for a in port_status_lists:
+            status = int(a.get('status'))
+            portlist = a.get('portlist')
+            if status < 2:
+                port_mac_lists.append({
+                    "portlist": portlist,
+                    "mac": []
+                })
+
+            else:
+                info = self.cmd('display mac-address interface ' + portlist)
+                re_text = '((?:\d|\w){4}\-(?:\d|\w){4}\-(?:\d|\w){4})'
+                result = re.findall(re_text, info)
+                port_mac_lists.append({
+                    "portlist": portlist,
+                    "mac": result
+                })
+        return port_mac_lists
